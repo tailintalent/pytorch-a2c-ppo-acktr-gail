@@ -83,24 +83,26 @@ def make_vec_envs(env_name,
                   device,
                   allow_early_resets,
                   num_frame_stack=None,
-                  pure_env=False,
+                  is_shared_memory=True,
+                  skip_vec=False,
+                  multiprocessing_context='fork',
                  ):
     envs = [
         make_env(env_name, seed, i, log_dir, allow_early_resets)
         for i in range(num_processes)
     ]
 
-    if pure_env:
-        return envs
-
     if len(envs) > 1:
-        envs = ShmemVecEnv(envs, context='fork')
+        envs = ShmemVecEnv(envs, context=multiprocessing_context, is_shared_memory=is_shared_memory, is_torch=skip_vec)
     else:
         envs = DummyVecEnv(envs)
 
+    if skip_vec:
+        return envs
+
     if len(envs.observation_space.shape) == 1:
         if gamma is None:
-            envs = VecNormalize(envs, ret=False)
+            envs = VecNormalize(envs, ret=False)  # A vectorized wrapper that normalizes the observations and returns from an environment.
         else:
             envs = VecNormalize(envs, gamma=gamma)
 
