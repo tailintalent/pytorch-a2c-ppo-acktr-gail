@@ -83,8 +83,7 @@ def make_vec_envs(env_name,
                   device,
                   allow_early_resets,
                   num_frame_stack=None,
-                  is_shared_memory=True,
-                  skip_vec=False,
+                  obs_graph=False,
                   multiprocessing_context='fork',
                  ):
     envs = [
@@ -93,11 +92,11 @@ def make_vec_envs(env_name,
     ]
 
     if len(envs) > 1:
-        envs = ShmemVecEnv(envs, context=multiprocessing_context, is_shared_memory=is_shared_memory, is_torch=skip_vec)
+        envs = ShmemVecEnv(envs, context=multiprocessing_context, is_shared_memory=not obs_graph, is_torch=obs_graph)
     else:
-        envs = DummyVecEnv(envs)
+        envs = DummyVecEnv(envs, obs_graph=obs_graph, is_torch=obs_graph)
 
-    if skip_vec:
+    if obs_graph:
         return envs
 
     if len(envs.observation_space.shape) == 1:
