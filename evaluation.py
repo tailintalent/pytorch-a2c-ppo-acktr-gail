@@ -44,5 +44,8 @@ def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir,
 
     eval_envs.close()
 
+    mean_reward = np.mean(eval_episode_rewards)
+    length = len(eval_episode_rewards)
     print(" Evaluation using {} episodes: mean reward {:.5f}\n".format(
-        len(eval_episode_rewards), np.mean(eval_episode_rewards)))
+        length, mean_reward))
+    return mean_reward, length
