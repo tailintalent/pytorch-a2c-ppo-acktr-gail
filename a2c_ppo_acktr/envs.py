@@ -85,6 +85,7 @@ def make_vec_envs(env_name,
                   num_frame_stack=None,
                   obs_graph=False,
                   multiprocessing_context='fork',
+                  is_dummy_env=False,
                   **kwargs
                  ):
     envs = [
@@ -92,7 +93,7 @@ def make_vec_envs(env_name,
         for i in range(num_processes)
     ]
 
-    if len(envs) > 1:
+    if len(envs) > 1 and not is_dummy_env:
         envs = ShmemVecEnv(envs, context=multiprocessing_context, is_shared_memory=not obs_graph, is_torch=obs_graph)
     else:
         envs = DummyVecEnv(envs, obs_graph=obs_graph, is_torch=obs_graph)
