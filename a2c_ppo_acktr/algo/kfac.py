@@ -95,7 +95,10 @@ class KFACOptimizer(optim.Optimizer):
                  weight_decay=0,
                  fast_cnn=False,
                  Ts=1,
-                 Tf=10):
+                 Tf=10,
+                 embedding_parameters=None,
+                 lr_embedding=1e-4,
+                ):
         defaults = dict()
 
         def split_bias(module):
@@ -136,10 +139,20 @@ class KFACOptimizer(optim.Optimizer):
         self.Ts = Ts
         self.Tf = Tf
 
-        self.optim = optim.SGD(
-            model.parameters(),
-            lr=self.lr * (1 - self.momentum),
-            momentum=self.momentum)
+        if embedding_parameters is None:
+            self.optim = optim.SGD(
+                model.parameters(),
+                lr=self.lr * (1 - self.momentum),
+                momentum=self.momentum,
+            )
+        else:
+            self.optim = optim.SGD(
+                [{"params": model.parameters()},
+                 {"params": embedding_parameters, "lr": lr_embedding}],
+                lr=self.lr * (1 - self.momentum),
+                momentum=self.momentum,
+            )
+
 
     def _save_input(self, module, input):
         if torch.is_grad_enabled() and self.steps % self.Ts == 0:
